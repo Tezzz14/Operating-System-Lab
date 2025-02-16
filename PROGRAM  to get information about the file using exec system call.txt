@@ -1,0 +1,20 @@
+//PROGRAM FOR SYSTEM CALLS OF UNIX OPERATING SYSTEMS (PROGRAM to get information about the file using exec system call.)
+
+
+#include<stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
+int main(){
+int pid;
+char *args[]={"/bin/ls","-l",0};
+printf("\nParent process");
+pid=fork();
+if(pid==0){
+execv("/bin/ls",args);
+}
+else{
+printf("\n Child process");
+}
+return 0;
+}
