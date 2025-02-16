@@ -1,0 +1,51 @@
+//To implement UNIX / Linux I/O system calls open, read, write etc.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+int main() {
+    int file_descriptor = creat("example.txt", 0644);
+    if (file_descriptor == -1) {
+        perror("Error creating file");
+        exit(EXIT_FAILURE);
+    }
+    printf("File created successfully!\n");
+    const char *data = "Hello, world!\n";
+    ssize_t bytes_written = write(file_descriptor, data, strlen(data));
+    if (bytes_written == -1) {
+        perror("Error writing to file");
+        close(file_descriptor);
+        exit(EXIT_FAILURE);
+    }
+    printf("Data written to file successfully!\n");
+    if (close(file_descriptor) == -1) {
+        perror("Error closing file");
+        exit(EXIT_FAILURE);
+    }
+    printf("File closed successfully!\n");
+    file_descriptor = open("example.txt", O_RDONLY);
+    if (file_descriptor == -1) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+    printf("File opened for reading successfully!\n");
+    char buffer[100];
+    ssize_t bytes_read = read(file_descriptor, buffer, sizeof(buffer) - 1);
+    if (bytes_read == -1) {
+        perror("Error reading from file");
+        close(file_descriptor);
+        exit(EXIT_FAILURE);
+    }
+    buffer[bytes_read] = '\0';
+    printf("Data read from file: %s\n", buffer);
+    if (close(file_descriptor) == -1) {
+        perror("Error closing file");
+        exit(EXIT_FAILURE);
+    }
+    printf("File closed successfully!\n");
+
+    return 0;
+}

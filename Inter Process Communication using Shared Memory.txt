@@ -1,0 +1,75 @@
+//C program Writer, attaches itself to the shared memory segment created in Reader Process and it reads the content of the shared memory.
+
+//write
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <string.h>
+#define SHMSZ 1024  
+int main() {
+    int shmid;
+    key_t key;
+    char *shm, *s;
+    key = ftok(".", 'S');
+    if (key == -1) {
+        perror("ftok");
+        exit(1);
+    }
+    shmid = shmget(key, SHMSZ, IPC_CREAT | 0666);
+    if (shmid < 0) {
+        perror("shmget");
+        exit(1);
+    }
+    shm = shmat(shmid, NULL, 0);
+    if (shm == (char *) -1) {
+        perror("shmat");
+        exit(1);
+    }
+    strcpy(shm,"Hello, this is the data from the writer process!");
+    if (shmdt(shm) == -1) {
+        perror("shmdt");
+        exit(1);
+    }
+    return 0;
+    }
+
+//read
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#define SHMSZ 1024
+int main() {
+    int shmid;
+    key_t key;
+    char *shm, *s;
+    key = ftok(".", 'S');
+    if (key == -1) {
+        perror("ftok");
+        exit(1);
+    }
+    shmid = shmget(key, SHMSZ, 0666);
+    if (shmid < 0) {
+        perror("shmget");
+        exit(1);
+    }
+    shm = shmat(shmid, NULL, 0);
+    if (shm == (char *) -1) {
+        perror("shmat");
+        exit(1);
+    }
+    printf("Data read from memory: %s\n", shm);
+    if (shmdt(shm) == -1) {
+        perror("shmdt");
+        exit(1);
+    }
+    if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+        perror("shmctl");
+        exit(1);
+    }
+    return 0;
+}
+
